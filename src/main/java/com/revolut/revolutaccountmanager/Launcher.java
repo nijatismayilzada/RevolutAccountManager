@@ -31,22 +31,24 @@ public class Launcher {
     }
 
     private static ServletContextHandler getServletContextHandler() {
-        ResourceConfig resourceConfig = new ResourceConfig() {{
-            packages("com.revolut.revolutaccountmanager");
-            register(new AbstractBinder() {
-                @Override
-                protected void configure() {
-                    bind(GreedyResolver.class).to(JustInTimeInjectionResolver.class);
-                }
-            });
-
-        }};
-        ServletHolder servletHolder = new ServletHolder(new ServletContainer(resourceConfig));
-        servletHolder.setInitOrder(1);
-
         ServletContextHandler contextHandler = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
         contextHandler.setContextPath("/");
-        contextHandler.addServlet(servletHolder, "/*");
+        contextHandler.addServlet(getServletHolder(), "/*");
         return contextHandler;
+    }
+
+    private static ServletHolder getServletHolder() {
+        ServletHolder servletHolder = new ServletHolder(new ServletContainer(getResourceConfig()));
+        servletHolder.setInitOrder(1);
+        return servletHolder;
+    }
+
+    private static ResourceConfig getResourceConfig() {
+        return new ResourceConfig().packages("com.revolut.revolutaccountmanager").register(new AbstractBinder() {
+            @Override
+            protected void configure() {
+                bind(GreedyResolver.class).to(JustInTimeInjectionResolver.class);
+            }
+        });
     }
 }
