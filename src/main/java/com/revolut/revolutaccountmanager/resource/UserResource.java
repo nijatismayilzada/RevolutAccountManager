@@ -1,6 +1,6 @@
 package com.revolut.revolutaccountmanager.resource;
 
-import com.revolut.revolutaccountmanager.model.CreateUserRequest;
+import com.revolut.revolutaccountmanager.model.request.CreateUserRequest;
 import com.revolut.revolutaccountmanager.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,7 @@ import javax.ws.rs.core.Response;
 @Path("users")
 public class UserResource {
 
-    private static Logger LOG = LoggerFactory.getLogger(UserResource.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UserResource.class);
 
     private final UserRepository userRepository;
 

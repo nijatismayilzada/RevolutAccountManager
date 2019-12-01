@@ -1,7 +1,8 @@
 package com.revolut.revolutaccountmanager.resource;
 
-import com.revolut.revolutaccountmanager.model.CreateAccountRequest;
+import com.revolut.revolutaccountmanager.model.request.CreateAccountRequest;
 import com.revolut.revolutaccountmanager.repository.AccountRepository;
+import com.revolut.revolutaccountmanager.service.AccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,12 +17,14 @@ import javax.ws.rs.core.Response;
 @Path("users/accounts")
 public class AccountResource {
 
-    private static Logger LOG = LoggerFactory.getLogger(AccountResource.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AccountResource.class);
     private final AccountRepository accountRepository;
+    private final AccountService accountService;
 
     @Inject
-    public AccountResource(AccountRepository accountRepository) {
+    public AccountResource(AccountRepository accountRepository, AccountService accountService) {
         this.accountRepository = accountRepository;
+        this.accountService = accountService;
     }
 
     @POST

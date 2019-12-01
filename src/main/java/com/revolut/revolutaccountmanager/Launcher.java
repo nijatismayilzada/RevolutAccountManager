@@ -14,13 +14,12 @@ import org.slf4j.LoggerFactory;
 
 public class Launcher {
 
-    private static Logger LOG = LoggerFactory.getLogger(Launcher.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Launcher.class);
 
     public static void main(String[] args) {
         Server server = new Server(8081);
-        server.setHandler(getServletContextHandler());
-
         try {
+            server.setHandler(getServletContextHandler());
             server.start();
             server.join();
         } catch (Exception ex) {

@@ -1,4 +1,4 @@
-package com.revolut.revolutaccountmanager.model;
+package com.revolut.revolutaccountmanager.model.request;
 
 import java.util.Objects;
 

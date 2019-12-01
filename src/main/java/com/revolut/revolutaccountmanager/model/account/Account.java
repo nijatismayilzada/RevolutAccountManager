@@ -1,4 +1,4 @@
-package com.revolut.revolutaccountmanager.domain;
+package com.revolut.revolutaccountmanager.model.account;
 
 import java.math.BigDecimal;
 import java.util.Currency;

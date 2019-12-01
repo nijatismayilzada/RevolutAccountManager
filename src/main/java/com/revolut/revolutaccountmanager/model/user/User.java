@@ -1,4 +1,6 @@
-package com.revolut.revolutaccountmanager.domain;
+package com.revolut.revolutaccountmanager.model.user;
+
+import com.revolut.revolutaccountmanager.model.account.Account;
 
 import java.util.List;
 import java.util.Objects;

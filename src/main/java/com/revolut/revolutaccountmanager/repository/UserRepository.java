@@ -1,10 +1,10 @@
 package com.revolut.revolutaccountmanager.repository;
 
 import com.revolut.revolutaccountmanager.config.JdbcConnection;
-import com.revolut.revolutaccountmanager.domain.Account;
-import com.revolut.revolutaccountmanager.domain.User;
-import com.revolut.revolutaccountmanager.exception.SQLRuntimeException;
-import com.revolut.revolutaccountmanager.model.CreateUserRequest;
+import com.revolut.revolutaccountmanager.model.account.Account;
+import com.revolut.revolutaccountmanager.model.exception.SQLRuntimeException;
+import com.revolut.revolutaccountmanager.model.request.CreateUserRequest;
+import com.revolut.revolutaccountmanager.model.user.User;
 import org.jvnet.hk2.annotations.Service;
 
 import javax.inject.Inject;
