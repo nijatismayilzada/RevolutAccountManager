@@ -13,13 +13,13 @@ import java.math.BigDecimal;
 import java.util.Currency;
 
 public class ValidationServiceTest {
-    public static final int TRANSACTION_ID = 111;
-    public static final int ACCOUNT_ID = 222;
-    public static final String GBP = "GBP";
+    private static final int TRANSACTION_ID = 111;
+    private static final int ACCOUNT_ID = 222;
+    private static final String GBP = "GBP";
     private ValidationService validationService;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         validationService = new ValidationService();
     }
 
