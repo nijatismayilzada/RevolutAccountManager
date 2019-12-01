@@ -2,8 +2,9 @@ package com.revolut.revolutaccountmanager.resource;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.revolut.revolutaccountmanager.model.CreateAccountRequest;
+import com.revolut.revolutaccountmanager.model.request.CreateAccountRequest;
 import com.revolut.revolutaccountmanager.repository.AccountRepository;
+import com.revolut.revolutaccountmanager.service.AccountService;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Before;
@@ -27,12 +28,14 @@ public class AccountResourceTest extends JerseyTest {
     private static final int USER_ID = -999;
 
     private AccountRepository accountRepository;
+    private AccountService accountService;
     private CreateAccountRequest createAccountRequest;
 
     @Override
     protected Application configure() {
         accountRepository = mock(AccountRepository.class);
-        return new ResourceConfig().register(new AccountResource(accountRepository));
+        accountService = mock(AccountService.class);
+        return new ResourceConfig().register(new AccountResource(accountRepository, accountService));
     }
 
     @Before

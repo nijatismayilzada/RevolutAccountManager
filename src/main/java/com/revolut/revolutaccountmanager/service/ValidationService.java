@@ -6,6 +6,8 @@ import com.revolut.revolutaccountmanager.model.transaction.Transaction;
 import com.revolut.revolutaccountmanager.model.transaction.TransactionAction;
 import org.jvnet.hk2.annotations.Service;
 
+import java.math.BigDecimal;
+
 @Service
 public class ValidationService {
     public void validateTransaction(Account account, Transaction transaction) {
@@ -21,6 +23,10 @@ public class ValidationService {
             if (transaction.getAmount().compareTo(account.getBalance()) > 0) {
                 throw new TransactionRuntimeException(String.format("Not enough funds. account: %s, transaction %s", account, transaction));
             }
+        }
+
+        if (transaction.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new TransactionRuntimeException(String.format("Negative transaction? account: %s, transaction %s", account, transaction));
         }
     }
 }

@@ -2,7 +2,7 @@ package com.revolut.revolutaccountmanager.resource;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.revolut.revolutaccountmanager.model.CreateUserRequest;
+import com.revolut.revolutaccountmanager.model.request.CreateUserRequest;
 import com.revolut.revolutaccountmanager.repository.UserRepository;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
