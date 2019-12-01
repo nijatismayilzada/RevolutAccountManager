@@ -15,5 +15,5 @@ gradlew.bat run
 
 * Application starts at 8081 port.
 
-* Go back to Revolut Transaction Manager to continue on the guie: https://github.com/nijatismayilzada/RevolutTransactionManager
+* Go back to Revolut Transaction Manager to continue on the guide: https://github.com/nijatismayilzada/RevolutTransactionManager
 
