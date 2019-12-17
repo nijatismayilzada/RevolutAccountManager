@@ -3,7 +3,7 @@ package com.revolut.revolutaccountmanager.repository.service;
 import com.revolut.revolutaccountmanager.model.account.Account;
 import com.revolut.revolutaccountmanager.model.exception.TransactionRuntimeException;
 import com.revolut.revolutaccountmanager.model.transaction.Transaction;
-import com.revolut.revolutaccountmanager.model.transaction.TransactionAction;
+import com.revolut.revolutaccountmanager.model.transaction.TransactionType;
 import com.revolut.revolutaccountmanager.service.ValidationService;
 import com.revolut.revolutaccountmanager.util.TestHelper;
 import org.junit.Before;
@@ -26,7 +26,7 @@ public class ValidationServiceTest {
     @Test(expected = TransactionRuntimeException.class)
     public void validateTransaction_givenEmptyInvalidAccount_failsValidation() {
         Account account = TestHelper.getAccount(0);
-        Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, 0, BigDecimal.TEN, Currency.getInstance(GBP), TransactionAction.INCREASE);
+        Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, 0, BigDecimal.TEN, Currency.getInstance(GBP));
 
         validationService.validateTransaction(account, transaction);
     }
@@ -34,7 +34,7 @@ public class ValidationServiceTest {
     @Test(expected = TransactionRuntimeException.class)
     public void validateTransaction_givenValidAccountButDifferentCurrencyTransaction_failsValidation() {
         Account account = TestHelper.getAccount(ACCOUNT_ID, BigDecimal.TEN, Currency.getInstance(GBP));
-        Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, 0, BigDecimal.TEN, Currency.getInstance("AZN"), TransactionAction.INCREASE);
+        Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, 0, BigDecimal.TEN, Currency.getInstance("AZN"));
 
         validationService.validateTransaction(account, transaction);
     }
@@ -42,7 +42,7 @@ public class ValidationServiceTest {
     @Test(expected = TransactionRuntimeException.class)
     public void validateTransaction_givenNotEnoughFunds_failsValidation() {
         Account account = TestHelper.getAccount(ACCOUNT_ID, BigDecimal.ONE, Currency.getInstance(GBP));
-        Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, 0, BigDecimal.TEN, Currency.getInstance(GBP), TransactionAction.DECREASE);
+        Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, 0, BigDecimal.TEN, Currency.getInstance(GBP), TransactionType.REVOLUT_SIMPLE_DECREASE);
 
         validationService.validateTransaction(account, transaction);
     }
@@ -50,7 +50,7 @@ public class ValidationServiceTest {
     @Test(expected = TransactionRuntimeException.class)
     public void validateTransaction_givenInvalidTransaction_failsValidation() {
         Account account = TestHelper.getAccount(ACCOUNT_ID, BigDecimal.ONE, Currency.getInstance(GBP));
-        Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, 0, BigDecimal.ZERO, Currency.getInstance(GBP), TransactionAction.DECREASE);
+        Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, 0, BigDecimal.ZERO, Currency.getInstance(GBP));
 
         validationService.validateTransaction(account, transaction);
     }
@@ -58,7 +58,7 @@ public class ValidationServiceTest {
     @Test
     public void validateTransaction_givenValidTransaction_doesNotFailValidation() {
         Account account = TestHelper.getAccount(ACCOUNT_ID, BigDecimal.ONE, Currency.getInstance(GBP));
-        Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, 0, BigDecimal.ONE, Currency.getInstance(GBP), TransactionAction.DECREASE);
+        Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, 0, BigDecimal.ONE, Currency.getInstance(GBP));
 
         validationService.validateTransaction(account, transaction);
     }

@@ -3,7 +3,7 @@ package com.revolut.revolutaccountmanager.repository.service;
 import com.revolut.revolutaccountmanager.model.account.Account;
 import com.revolut.revolutaccountmanager.model.exception.TransactionRuntimeException;
 import com.revolut.revolutaccountmanager.model.transaction.Transaction;
-import com.revolut.revolutaccountmanager.model.transaction.TransactionAction;
+import com.revolut.revolutaccountmanager.model.transaction.TransactionType;
 import com.revolut.revolutaccountmanager.repository.AccountRepository;
 import com.revolut.revolutaccountmanager.service.AccountService;
 import com.revolut.revolutaccountmanager.service.MessageConsumer;
@@ -59,7 +59,7 @@ public class AccountServiceTest {
 
     @Test
     public void onMessage_givenValidMessage_canProcessSuccessfully() throws JMSException {
-        Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, ACCOUNT_ID, BigDecimal.TEN, Currency.getInstance("GBP"), TransactionAction.INCREASE);
+        Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, ACCOUNT_ID, BigDecimal.TEN, Currency.getInstance("GBP"));
         Account account = TestHelper.getAccount(ACCOUNT_ID);
 
         when(transactionManagerClient.getTransactionById(TRANSACTION_ID)).thenReturn(transaction);
@@ -80,7 +80,7 @@ public class AccountServiceTest {
 
     @Test
     public void onMessage_givenValidMessage_canDecreaseBalanceSuccessfully() throws JMSException {
-        Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, ACCOUNT_ID, BigDecimal.TEN, Currency.getInstance("GBP"), TransactionAction.DECREASE);
+        Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, ACCOUNT_ID, BigDecimal.TEN, Currency.getInstance("GBP"), TransactionType.REVOLUT_SIMPLE_DECREASE);
         Account account = TestHelper.getAccount(ACCOUNT_ID);
         when(transactionManagerClient.getTransactionById(TRANSACTION_ID)).thenReturn(transaction);
         when(accountRepository.getAccount(ACCOUNT_ID)).thenReturn(account);
@@ -100,7 +100,7 @@ public class AccountServiceTest {
 
     @Test
     public void onMessage_givenInvalidMessage_sendsFailMessage() throws JMSException {
-        Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, ACCOUNT_ID, BigDecimal.TEN, Currency.getInstance("GBP"), TransactionAction.DECREASE);
+        Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, ACCOUNT_ID, BigDecimal.TEN, Currency.getInstance("GBP"));
         Account account = TestHelper.getAccount(ACCOUNT_ID);
         when(transactionManagerClient.getTransactionById(TRANSACTION_ID)).thenReturn(transaction);
         when(accountRepository.getAccount(ACCOUNT_ID)).thenReturn(account);

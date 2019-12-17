@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.revolut.revolutaccountmanager.model.account.Account;
 import com.revolut.revolutaccountmanager.model.exception.TransactionRuntimeException;
 import com.revolut.revolutaccountmanager.model.transaction.Transaction;
-import com.revolut.revolutaccountmanager.model.transaction.TransactionAction;
 import com.revolut.revolutaccountmanager.model.transaction.TransactionEvent;
 import com.revolut.revolutaccountmanager.model.transaction.TransactionType;
 import com.revolut.revolutaccountmanager.repository.AccountRepository;
@@ -62,29 +61,24 @@ public class AccountService implements MessageListener {
             LOG.error("Failed to process message: {}", message, e);
             messageProducer.getTransactionFailedProducer().send(message);
         } catch (JMSException ex) {
+            LOG.error("JMS error while handling failed message", ex);
             throw new TransactionRuntimeException(ex);
         }
     }
 
     private void processTransaction(Transaction transaction) {
-        if (transaction.getTransactionType() == TransactionType.REVOLUT_SIMPLE) {
-            Account account = accountRepository.getAccount(transaction.getAccountId());
-
-            validationService.validateTransaction(account, transaction);
-
-            if (transaction.getTransactionAction() == TransactionAction.INCREASE) {
-                accountRepository.increaseAccountBalance(account.getAccountId(), transaction.getAmount());
-            } else if (transaction.getTransactionAction() == TransactionAction.DECREASE) {
-                accountRepository.decreaseAccountBalance(account.getAccountId(), transaction.getAmount());
-            } else {
-                throw new TransactionRuntimeException(String.format("Non supported transaction action. transaction %s", transaction));
-            }
-
+        Account account = accountRepository.getAccount(transaction.getAccountId());
+        validationService.validateTransaction(account, transaction);
+        if (transaction.getTransactionType() == TransactionType.REVOLUT_SIMPLE_INCREASE) {
+            accountRepository.increaseAccountBalance(account.getAccountId(), transaction.getAmount());
+        } else if (transaction.getTransactionType() == TransactionType.REVOLUT_SIMPLE_DECREASE) {
+            accountRepository.decreaseAccountBalance(account.getAccountId(), transaction.getAmount());
+        } else if (transaction.getTransactionType() == TransactionType.REVOLUT_TRANSFER) {
+            accountRepository.decreaseAccountBalance(account.getAccountId(), transaction.getAmount());
+            transactionManagerClient.createSimpleIncreaseTransactionRequest(transaction);
         } else {
-            throw new TransactionRuntimeException(String.format("Only Revolut simple transactions are supported yet. transaction %s", transaction));
+            throw new TransactionRuntimeException(String.format("Does not support this transaction type. transaction %s", transaction));
         }
-
     }
-
 
 }

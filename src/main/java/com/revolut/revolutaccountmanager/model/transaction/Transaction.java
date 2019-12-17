@@ -19,7 +19,6 @@ public class Transaction {
     @JsonDeserialize(using = InstantDeserializer.class)
     private Instant stateUpdatedAt;
     private TransactionType transactionType;
-    private TransactionAction transactionAction;
     private BigDecimal amount;
     private Currency currency;
 
@@ -74,14 +73,6 @@ public class Transaction {
         this.transactionType = transactionType;
     }
 
-    public TransactionAction getTransactionAction() {
-        return transactionAction;
-    }
-
-    public void setTransactionAction(TransactionAction transactionAction) {
-        this.transactionAction = transactionAction;
-    }
-
     public BigDecimal getAmount() {
         return amount;
     }
@@ -109,14 +100,13 @@ public class Transaction {
                 transactionState == that.transactionState &&
                 Objects.equals(stateUpdatedAt, that.stateUpdatedAt) &&
                 transactionType == that.transactionType &&
-                transactionAction == that.transactionAction &&
                 Objects.equals(amount, that.amount) &&
                 Objects.equals(currency, that.currency);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(transactionId, accountId, reference, transactionState, stateUpdatedAt, transactionType, transactionAction, amount, currency);
+        return Objects.hash(transactionId, accountId, reference, transactionState, stateUpdatedAt, transactionType, amount, currency);
     }
 
     @Override
@@ -128,7 +118,6 @@ public class Transaction {
                 ", transactionState=" + transactionState +
                 ", stateUpdatedAt=" + stateUpdatedAt +
                 ", transactionType=" + transactionType +
-                ", transactionAction=" + transactionAction +
                 ", amount=" + amount +
                 ", currency=" + currency +
                 '}';
