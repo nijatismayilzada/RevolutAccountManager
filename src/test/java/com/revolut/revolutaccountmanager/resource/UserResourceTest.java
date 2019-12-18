@@ -3,6 +3,7 @@ package com.revolut.revolutaccountmanager.resource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.revolut.revolutaccountmanager.model.request.CreateUserRequest;
+import com.revolut.revolutaccountmanager.model.user.User;
 import com.revolut.revolutaccountmanager.repository.UserRepository;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
@@ -55,6 +56,29 @@ public class UserResourceTest extends JerseyTest {
 
         Response response = target("/users/create").request()
                 .post(Entity.json(new ObjectMapper().writeValueAsString(createUserRequest)));
+
+        assertThat("Http Response should be INTERNAL_SERVER_ERROR", response.getStatus(), is(INTERNAL_SERVER_ERROR.getStatusCode()));
+    }
+
+    @Test
+    public void getUserById_whenUserIsAvailable_thenReturnUserDetails() {
+        User user = new User();
+        user.setName("TestUser");
+        user.setUserId(USER_ID);
+
+        when(userRepository.getUserById(USER_ID)).thenReturn(user);
+
+        Response response = target("/users/user-id").path(String.valueOf(USER_ID)).request().get();
+
+        assertThat("Http Response should be OK", response.getStatus(), is(OK.getStatusCode()));
+        assertThat("Response should contain user details: " + user.toString(), response.readEntity(User.class), is(user));
+    }
+
+    @Test
+    public void getUserById_whenRepositoryFailsToFetchUserDetails_thenRespondInternalServerError() {
+        when(userRepository.getUserById(USER_ID)).thenThrow(new RuntimeException());
+
+        Response response = target("/users/user-id").path(String.valueOf(USER_ID)).request().get();
 
         assertThat("Http Response should be INTERNAL_SERVER_ERROR", response.getStatus(), is(INTERNAL_SERVER_ERROR.getStatusCode()));
     }

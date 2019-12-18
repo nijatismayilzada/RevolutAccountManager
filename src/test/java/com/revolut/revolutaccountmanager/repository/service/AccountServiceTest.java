@@ -20,8 +20,10 @@ import javax.jms.TextMessage;
 import java.math.BigDecimal;
 import java.util.Currency;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -40,6 +42,9 @@ public class AccountServiceTest {
 
     private AccountService accountService;
 
+    private TextMessage textMessage;
+    private Account account;
+
     @Before
     public void setUp() throws JMSException {
         accountRepository = mock(AccountRepository.class);
@@ -55,25 +60,24 @@ public class AccountServiceTest {
         when(messageProducer.getTransactionFailedProducer()).thenReturn(jmsFailedMessageProducer);
 
         accountService = new AccountService(accountRepository, messageConsumer, transactionManagerClient, messageProducer, validationService);
+
+        textMessage = new ActiveMQTextMessage();
+        textMessage.setText("{\"transactionId\" : " + TRANSACTION_ID + "}");
+        account = TestHelper.getAccount(ACCOUNT_ID);
+        when(accountRepository.getAccount(ACCOUNT_ID)).thenReturn(account);
     }
 
     @Test
-    public void onMessage_givenValidMessage_canProcessSuccessfully() throws JMSException {
-        Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, ACCOUNT_ID, BigDecimal.TEN, Currency.getInstance("GBP"));
-        Account account = TestHelper.getAccount(ACCOUNT_ID);
-
+    public void onMessage_givenValidMessage_canIncreaseBalanceSuccessfully() throws JMSException {
+        Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, ACCOUNT_ID, BigDecimal.TEN, Currency.getInstance("GBP"), TransactionType.REVOLUT_SIMPLE_INCREASE);
         when(transactionManagerClient.getTransactionById(TRANSACTION_ID)).thenReturn(transaction);
-        when(accountRepository.getAccount(ACCOUNT_ID)).thenReturn(account);
-
-        TextMessage textMessage = new ActiveMQTextMessage();
-        textMessage.setText("{\"transactionId\" : " + TRANSACTION_ID + "}");
 
         accountService.onMessage(textMessage);
 
         verify(accountRepository).getAccount(ACCOUNT_ID);
         verify(accountRepository).increaseAccountBalance(ACCOUNT_ID, BigDecimal.TEN);
         verifyNoMoreInteractions(accountRepository);
-
+        verify(transactionManagerClient, never()).createSimpleIncreaseTransactionRequest(any());
         verify(jmsCompleteMessageProducer).send(textMessage);
         verifyZeroInteractions(jmsFailedMessageProducer);
     }
@@ -81,19 +85,29 @@ public class AccountServiceTest {
     @Test
     public void onMessage_givenValidMessage_canDecreaseBalanceSuccessfully() throws JMSException {
         Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, ACCOUNT_ID, BigDecimal.TEN, Currency.getInstance("GBP"), TransactionType.REVOLUT_SIMPLE_DECREASE);
-        Account account = TestHelper.getAccount(ACCOUNT_ID);
         when(transactionManagerClient.getTransactionById(TRANSACTION_ID)).thenReturn(transaction);
-        when(accountRepository.getAccount(ACCOUNT_ID)).thenReturn(account);
-
-        TextMessage textMessage = new ActiveMQTextMessage();
-        textMessage.setText("{\"transactionId\" : " + TRANSACTION_ID + "}");
 
         accountService.onMessage(textMessage);
 
         verify(accountRepository).getAccount(ACCOUNT_ID);
         verify(accountRepository).decreaseAccountBalance(ACCOUNT_ID, BigDecimal.TEN);
         verifyNoMoreInteractions(accountRepository);
+        verify(transactionManagerClient, never()).createSimpleIncreaseTransactionRequest(any());
+        verify(jmsCompleteMessageProducer).send(textMessage);
+        verifyZeroInteractions(jmsFailedMessageProducer);
+    }
 
+    @Test
+    public void onMessage_givenValidMessage_canTransferBalanceSuccessfully() throws JMSException {
+        Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, ACCOUNT_ID, BigDecimal.TEN, Currency.getInstance("GBP"), TransactionType.REVOLUT_TRANSFER);
+        when(transactionManagerClient.getTransactionById(TRANSACTION_ID)).thenReturn(transaction);
+
+        accountService.onMessage(textMessage);
+
+        verify(accountRepository).getAccount(ACCOUNT_ID);
+        verify(accountRepository).decreaseAccountBalance(ACCOUNT_ID, BigDecimal.TEN);
+        verifyNoMoreInteractions(accountRepository);
+        verify(transactionManagerClient).createSimpleIncreaseTransactionRequest(transaction);
         verify(jmsCompleteMessageProducer).send(textMessage);
         verifyZeroInteractions(jmsFailedMessageProducer);
     }
@@ -101,19 +115,14 @@ public class AccountServiceTest {
     @Test
     public void onMessage_givenInvalidMessage_sendsFailMessage() throws JMSException {
         Transaction transaction = TestHelper.getTransaction(TRANSACTION_ID, ACCOUNT_ID, BigDecimal.TEN, Currency.getInstance("GBP"));
-        Account account = TestHelper.getAccount(ACCOUNT_ID);
         when(transactionManagerClient.getTransactionById(TRANSACTION_ID)).thenReturn(transaction);
-        when(accountRepository.getAccount(ACCOUNT_ID)).thenReturn(account);
         doThrow(new TransactionRuntimeException("Fail")).when(validationService).validateTransaction(account, transaction);
-
-        TextMessage textMessage = new ActiveMQTextMessage();
-        textMessage.setText("{\"transactionId\" : " + TRANSACTION_ID + "}");
 
         accountService.onMessage(textMessage);
 
         verify(accountRepository).getAccount(ACCOUNT_ID);
         verifyNoMoreInteractions(accountRepository);
-
+        verify(transactionManagerClient, never()).createSimpleIncreaseTransactionRequest(any());
         verify(jmsFailedMessageProducer).send(textMessage);
         verifyZeroInteractions(jmsCompleteMessageProducer);
     }
